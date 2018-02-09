@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "738271679203",
+    "firebase_url": "https://projectmisterbudget.firebaseio.com",
+    "project_id": "projectmisterbudget",
+    "storage_bucket": "projectmisterbudget.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738271679203:android:bac6cb4c2ba4cea7",
+        "android_client_info": {
+          "package_name": "com.testproduct.testpart3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "738271679203-oi6gshcf9pg9vrsolhr1atn7fq5jf4qu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_rzl6adR3X316wmDwEuXzf5R7isUMro4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

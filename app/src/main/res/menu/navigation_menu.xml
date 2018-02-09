@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/menu_top"
+        android:checkableBehavior="single">
+
+    <item android:id="@+id/entertainment"
+        android:title="Entertainment"
+        android:icon="@mipmap/ic_event_seat_black_24dp"/>
+
+    <item android:id="@+id/food"
+        android:title="Food"
+        android:icon="@mipmap/ic_local_dining_black_24dp"/>
+
+    <item android:id="@+id/utilities"
+        android:title="Utilities"
+        android:icon="@mipmap/ic_star_border_black_24dp"/>
+
+    </group>
+
+    <group
+        android:id="@+id/menu_bottom"
+        android:checkableBehavior="none">
+
+        <item android:id="@+id/account"
+            android:title="My Investments"
+            android:icon="@mipmap/ic_person_black_24dp"/>
+
+        <item android:title="Settings"
+            android:icon="@mipmap/ic_settings_black_24dp"/>
+
+        <item android:title="Log Out"
+              android:icon="@mipmap/ic_cancel_black_24dp"
+              android:id="@+id/logout"/>
+
+    </group>
+
+</menu>
