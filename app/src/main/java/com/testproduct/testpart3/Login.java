@@ -1,8 +1,10 @@
 package com.testproduct.testpart3;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -53,6 +55,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         buttonLogIn.setOnClickListener(this);
         textViewSignUp.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -69,6 +73,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     private void userLogin() {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
+
+        final EditText editTextPrompt = new EditText(this);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         if (TextUtils.isEmpty(email)) {
             Toast.makeText(this, "Please enter an email", Toast.LENGTH_SHORT).show();
@@ -92,9 +100,27 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                         progressDialog.dismiss();
                         if(task.isSuccessful()){
                             //if the user is successfully logged on
-                            //beginning profile
-                            finish();
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+
+                            // Prompt Message Upon MainActivty Loading
+
+                            builder.setTitle("Before we start...");
+                            builder.setMessage("Please enter your planned budget");
+                            builder.setCancelable(false);
+                            builder.setView(editTextPrompt);
+                            builder.setNeutralButton("Enter", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent;
+                                    Toast.makeText(getApplicationContext(), "Thanks for the input. Now beginning demo.", Toast.LENGTH_LONG).show();
+                                    //beginning profile
+                                    finish();
+                                    intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    intent.putExtra("PromptValue",editTextPrompt.getText().toString());
+                                    startActivity(intent);
+                                }
+                            });
+                            builder.show();
+
                         }
                         else{
                             Toast.makeText(Login.this, "Username or password invalid. Try Again?", Toast.LENGTH_SHORT).show();

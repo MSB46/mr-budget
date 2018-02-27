@@ -93,7 +93,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                         Toast.makeText(Register.this,"Register successful!", Toast.LENGTH_SHORT).show();
                     }
                     else{
-                        Toast.makeText(Register.this,"Unable to register. Perhaps try again later", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Register.this,"Unable to register. Either we messed up or you did. Probably the latter.", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
