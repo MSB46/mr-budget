@@ -2,6 +2,8 @@ package com.testproduct.testpart3;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +23,8 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -50,10 +54,23 @@ public class MainActivity extends AppCompatActivity {
     Calendar cal = Calendar.getInstance();
     TextView txtViewPrompt;
 
+    private static int x = 0;
+
+    FirebaseDatabase database;
+    private DatabaseReference databaseReference;
+
+    DatabaseReference myBudget;
+
+    //Intent entToHome = getIntent();
+    //String activity = entToHome.getStringExtra("activity");
 
 
 
 
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +78,23 @@ public class MainActivity extends AppCompatActivity {
 
         txtViewPrompt = (TextView)findViewById(R.id.txtViewPrompt);
 
-        txtViewPrompt.setText("Your current budget is $"+getIntent().getStringExtra("PromptValue"));
+        final EditText editTemp = (EditText) findViewById(R.id.editTemp);
+
+        String val = getIntent().getStringExtra("PromptValue");
+
+
+
+
+
+        txtViewPrompt.setText("Your current budget is $"+val);
 
         firebaseAuth = FirebaseAuth.getInstance();
         if( firebaseAuth.getCurrentUser() == null){
             finish();
             startActivity(new Intent(this, Login.class));
         }
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
@@ -155,11 +182,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        final EditText editTemp = (EditText) findViewById(R.id.editTemp);
+
         editTemp.setFilters(new InputFilter[] { filter });
 
 
-        Button btnTemp = (Button) findViewById(R.id.btnTemp);
+        final Button btnTemp = (Button) findViewById(R.id.btnTemp);
 
         Date c = Calendar.getInstance().getTime();
         System.out.println("Current time => " + c);
@@ -167,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat df = new SimpleDateFormat("MMM/dd/yyyy");
         final String formattedDate = df.format(c);
 
-        final int[] x = {1};
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -179,29 +205,77 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                if(editTemp.getText().toString().isEmpty()){
+                    Toast.makeText(getApplicationContext(), "Please enter a value", Toast.LENGTH_SHORT).show();
+                    //prevents further execution
+                    return;
+                }
+
+
+
 
                 builder
                         .setMessage("$"+editTemp.getText().toString()+" Is this your intended input?")
                         .setPositiveButton("Confirm",  new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 // Yes-code
+                                String val = getIntent().getStringExtra("PromptValue");
+                                Integer valBudget = Integer.parseInt(val);
+
+
                                 listDataHeader.add("$"+editTemp.getText().toString());
+                                Integer deduct = Integer.parseInt(editTemp.getText().toString());
+                                Integer currentAmount = Math.subtractExact(valBudget,deduct);
+
+                                int xplus = x+1;
 
                                 List<String> ArrayNew = new ArrayList<>();
-                                ArrayNew.add("Entertainment");
+                                ArrayNew.add("Category");
                                 ArrayNew.add(formattedDate.toString());
+                                ArrayNew.add("Expense #"+xplus);
 
 
                                 listAdapter.notifyDataSetChanged();
-                                listDataChild.put(listDataHeader.get(x[0]), ArrayNew);
+                                listDataChild.put(listDataHeader.get(x), ArrayNew);
+
+                                if (currentAmount > 0) {
+                                    if (x == 0) {
+
+                                        txtViewPrompt.setText("Your current budget is $" + currentAmount.toString());
+
+
+
+                                    }
+
+                                    if (x != 0) {
+
+                                        int newValue = currentAmount - deduct;
+
+                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(newValue));
+
+
+                                    }
+                                }
+
+                                if (currentAmount < 0 || currentAmount == 0){
+
+                                    txtViewPrompt.setText("You outspent your current budget!");
+                                    btnTemp.setEnabled(false);
+
+                                }
 
 
                                 Toast.makeText(getApplicationContext(),
                                         "Added.",
                                         Toast.LENGTH_SHORT).show();
 
-                                x[0]++;
+
+
+                                x++;
+
+                                saveUserInfo();
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -212,24 +286,6 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .show();
 
-                /*listDataHeader.add("$"+editTemp.getText().toString());
-
-                List<String> ArrayNew = new ArrayList<>();
-                ArrayNew.add("Entertainment");
-                ArrayNew.add(formattedDate.toString());
-
-
-                listAdapter.notifyDataSetChanged();
-                listDataChild.put(listDataHeader.get(x[0]), ArrayNew);
-
-
-                Toast.makeText(getApplicationContext(),
-                        "Added.",
-                        Toast.LENGTH_SHORT).show();
-
-                x[0]++;
-*/
-                //confirmDialogInvest();
 
 
 
@@ -246,7 +302,9 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(mToggle);
         mToggle.syncState();
 
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         navigation = (NavigationView) findViewById(R.id.navigation_view);
         navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -257,16 +315,19 @@ public class MainActivity extends AppCompatActivity {
                 switch (id) {
                     case R.id.food:
                         Intent fo = new Intent(MainActivity.this, Food.class);
+                        fo.putExtra("PromptValue",txtViewPrompt.getText());
                         startActivity(fo);
                         break;
 
                     case R.id.entertainment:
                         Intent en = new Intent(MainActivity.this, Entertainment.class);
+                        en.putExtra("PromptValue",txtViewPrompt.getText());
                         startActivity(en);
                         break;
 
                     case R.id.utilities:
                         Intent ut = new Intent(MainActivity.this, Utilities.class);
+                        ut.putExtra("PromptValue",txtViewPrompt.getText());
                         startActivity(ut);
                         break;
 
@@ -280,6 +341,24 @@ public class MainActivity extends AppCompatActivity {
             }});}
 
 
+    private void saveUserInfo(){
+        String val = getIntent().getStringExtra("PromptValue");
+        EditText editTemp = (EditText) findViewById(R.id.editTemp);
+
+        String expenses = editTemp.getText().toString().trim();
+        String budget = val.trim();
+
+        UserInfo userInfo = new UserInfo(budget,expenses);
+
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+
+        databaseReference.child(user.getUid()).push().setValue(userInfo);
+
+        //databaseReference.child(user.getUid()).push().setValue(editTemp.getText().toString());
+
+
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
 
 
@@ -290,69 +369,22 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    /*
-    private void confirmDialogInvest() {
-        listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
-        final EditText editTemp = (EditText) findViewById(R.id.editTemp);
-
-        Date c = Calendar.getInstance().getTime();
-        System.out.println("Current time => " + c);
-
-        SimpleDateFormat df = new SimpleDateFormat("MMM/dd/yyyy");
-        final String formattedDate = df.format(c);
-
-        final int[] x = {1};
 
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder
-                .setMessage("$"+editTemp.getText().toString()+" Is this your intended input?")
-                .setPositiveButton("Confirm",  new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Yes-code
-                        listDataHeader.add("$"+editTemp.getText().toString());
-
-                        List<String> ArrayNew = new ArrayList<>();
-                        ArrayNew.add("Entertainment");
-                        ArrayNew.add(formattedDate.toString());
-
-
-                        listAdapter.notifyDataSetChanged();
-                        listDataChild.put(listDataHeader.get(x[0]), ArrayNew);
-
-
-                        Toast.makeText(getApplicationContext(),
-                                "Added.",
-                                Toast.LENGTH_SHORT).show();
-
-                        x[0]++;
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,int id) {
-                        dialog.cancel();
-                    }
-                })
-                .show();
-    }
-*/
     public void prepareListData() {
         listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<String>>();
         Entertainment ent = new Entertainment();
 
-        listDataHeader.add("$5.00");
+        //listDataHeader.add("$5.00");
         //listDataHeader.add("B");
         //listDataHeader.add("C");
         //listDataHeader.add("D");
 
 
-        List<String> ArrayA = new ArrayList<>();
-        ArrayA.add("Food");
-        ArrayA.add("Feb/25/2018");
+        //List<String> ArrayA = new ArrayList<>();
+        //ArrayA.add("Food");
+        //ArrayA.add("Feb/25/2018");
         //ArrayA.add("Test");
 
        /* List<String> B = new ArrayList<>();
@@ -372,13 +404,12 @@ public class MainActivity extends AppCompatActivity {
         */
 
 
-        listDataChild.put(listDataHeader.get(0), ArrayA);
+        //listDataChild.put(listDataHeader.get(0), ArrayA);
         //listDataChild.put(listDataHeader.get(1), B);
         //listDataChild.put(listDataHeader.get(2), C);
         //listDataChild.put(listDataHeader.get(3), D);
 
     }
-
 
 
         }

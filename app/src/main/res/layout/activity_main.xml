@@ -35,7 +35,6 @@
             android:textStyle="bold"
             android:layout_marginLeft="70dp" />
 
-
         <Button
             android:id="@+id/btnTemp"
             android:layout_width="211dp"

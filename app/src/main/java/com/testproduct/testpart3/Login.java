@@ -26,9 +26,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     private EditText editTextEmail;
     private EditText editTextPassword;
     private TextView textViewSignUp;
-
     private FirebaseAuth firebaseAuth;
-
     private ProgressDialog progressDialog;
 
     @Override
@@ -38,11 +36,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        if(firebaseAuth.getCurrentUser() != null){
+        //if(firebaseAuth.getCurrentUser() != null){
             //transfer to another activity
-            finish();
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        }
+            //finish();
+            //startActivity(new Intent(getApplicationContext(), Login.class));
+
+
+        //}
 
         progressDialog = new ProgressDialog(this);
 
