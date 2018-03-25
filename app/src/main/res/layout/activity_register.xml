@@ -29,7 +29,7 @@
             android:gravity="center"
             android:paddingTop="20dp"
             android:text="Register"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textColor="@color/colorPrimary"
             android:textSize="24sp" />
 
         <EditText
@@ -53,8 +53,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
-            android:background="@android:color/darker_gray"
-            android:text="Register" />
+            android:background="?attr/colorPrimary"
+            android:text="Register"
+            android:textColor="@color/common_google_signin_btn_text_dark_default" />
 
         <TextView
             android:id="@+id/textSignIn"

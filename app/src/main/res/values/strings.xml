@@ -26,4 +26,14 @@
         completions."
     </string>
 
+    <string-array name="categories">
+
+        <item>Food</item>
+        <item>Entertainment</item>
+        <item>Utilities</item>
+        <item>Transportation</item>
+        <item>Insurance</item>
+
+    </string-array>
+
 </resources>

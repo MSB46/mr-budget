@@ -15,9 +15,12 @@ import android.text.Spanned;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +37,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
+
+    Spinner spinner;
+    ArrayAdapter<CharSequence> adapter;
 
     private FirebaseAuth firebaseAuth;
     private TextView textViewUserEmail;
@@ -61,13 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     DatabaseReference myBudget;
 
-    //Intent entToHome = getIntent();
-    //String activity = entToHome.getStringExtra("activity");
-
-
-
-
-
+    private static String category;
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -75,6 +75,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        spinner = (Spinner) findViewById(R.id.simpleSpinner);
+        adapter = ArrayAdapter.createFromResource(this,R.array.categories,android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // i represents position
+                // adapterView is the parent
+
+                Toast.makeText(getBaseContext(),adapterView.getItemAtPosition(i)+" chosen",Toast.LENGTH_LONG).show();
+                category = adapterView.getItemAtPosition(i).toString();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         txtViewPrompt = (TextView)findViewById(R.id.txtViewPrompt);
 
@@ -201,6 +223,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
         btnTemp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -222,17 +246,17 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 // Yes-code
                                 String val = getIntent().getStringExtra("PromptValue");
-                                Integer valBudget = Integer.parseInt(val);
+                                double valBudget = Double.parseDouble(val);
 
 
                                 listDataHeader.add("$"+editTemp.getText().toString());
-                                Integer deduct = Integer.parseInt(editTemp.getText().toString());
-                                Integer currentAmount = Math.subtractExact(valBudget,deduct);
+                                double deduct = Double.parseDouble(editTemp.getText().toString());
+                                double currentAmount = valBudget - deduct;
 
                                 int xplus = x+1;
 
                                 List<String> ArrayNew = new ArrayList<>();
-                                ArrayNew.add("Category");
+                                ArrayNew.add(category);
                                 ArrayNew.add(formattedDate.toString());
                                 ArrayNew.add("Expense #"+xplus);
 
@@ -243,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentAmount > 0) {
                                     if (x == 0) {
 
-                                        txtViewPrompt.setText("Your current budget is $" + currentAmount.toString());
+                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(currentAmount));
 
 
 
@@ -251,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     if (x != 0) {
 
-                                        int newValue = currentAmount - deduct;
+                                        double newValue = currentAmount - deduct;
 
                                         txtViewPrompt.setText("Your current budget is $" + String.valueOf(newValue));
 

@@ -18,22 +18,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <EditText
-            android:id="@+id/editTemp"
-            android:layout_width="220dp"
+        <Spinner
+            android:id="@+id/simpleSpinner"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginStart="70dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_centerHorizontal="true" />
+
+        <EditText
+            android:id="@+id/editTemp"
+            android:layout_width="245dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="70dp"
             android:layout_marginStart="70dp"
             android:layout_marginTop="10dp"
             android:layout_toRightOf="@+id/constant_text"
             android:background="@android:color/transparent"
             android:gravity="center_vertical|center_horizontal"
-            android:hint="Enter the cost of your most recent item here"
+            android:hint="Enter cost of expense"
+            android:inputType="numberDecimal"
             android:paddingLeft="5dp"
             android:textColor="#000000"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="70dp" />
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnTemp"
@@ -61,7 +73,7 @@
                 android:layout_alignParentTop="true"
                 android:fontFamily="@font/annie_use_your_telescope"
                 android:paddingTop="32dp"
-                android:text="Previous Investments"
+                android:text="Previous Expenses"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="bold"
