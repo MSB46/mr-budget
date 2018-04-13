@@ -25,6 +25,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="add_instruction">"Enter the amount of money you would like to add onto your current budget"</string>
 
     <string-array name="categories">
 

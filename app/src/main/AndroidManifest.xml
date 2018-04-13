@@ -41,7 +41,8 @@
             android:label="Utilities" />
         <activity android:name=".EnterBalance" />
         <activity android:name=".Register" />
-        <activity android:name=".Login"></activity>
+        <activity android:name=".Login" />
+        <activity android:name=".Add"></activity>
     </application>
 
 </manifest>

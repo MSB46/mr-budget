@@ -2,7 +2,9 @@ package com.testproduct.testpart3;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -12,9 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
+import android.util.SparseArray;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,13 +73,36 @@ public class MainActivity extends AppCompatActivity  {
     DatabaseReference myBudget;
 
     private static String category;
+    private static String detail;
+
+    private static int currentAmount;
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
         super.onCreate(savedInstanceState);
+
+        loadPrefs();
+
+        prepareListData();
+
+
         setContentView(R.layout.activity_main);
+
+        final List<String> ArrayNew = new ArrayList<>();
+
+        final EditText editTextItem = new EditText(this);
+
+        String val = getIntent().getStringExtra("PromptValue");
+        int valBudget = Integer.parseInt(val);
+
+        currentAmount = valBudget;
+
 
         spinner = (Spinner) findViewById(R.id.simpleSpinner);
         adapter = ArrayAdapter.createFromResource(this,R.array.categories,android.R.layout.simple_spinner_item);
@@ -102,11 +130,6 @@ public class MainActivity extends AppCompatActivity  {
 
         final EditText editTemp = (EditText) findViewById(R.id.editTemp);
 
-        String val = getIntent().getStringExtra("PromptValue");
-
-
-
-
 
         txtViewPrompt.setText("Your current budget is $"+val);
 
@@ -120,12 +143,7 @@ public class MainActivity extends AppCompatActivity  {
 
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
-
-
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
-
-        // preparing list data
-       prepareListData();
 
         listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
 
@@ -171,9 +189,19 @@ public class MainActivity extends AppCompatActivity  {
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
+            public boolean onChildClick( ExpandableListView parent, View v,
+                                         int groupPosition, int childPosition, long id) {
                 // TODO Auto-generated method stub
+                SparseArray<Boolean> hasClicked = new SparseArray<Boolean>();
+
+
+                    //Prompt goes here
+
+                    //expListView.removeView(v);
+
+
+
+
                 Toast.makeText(
                         getApplicationContext(),
                         listDataHeader.get(groupPosition)
@@ -183,6 +211,8 @@ public class MainActivity extends AppCompatActivity  {
                                 childPosition), Toast.LENGTH_SHORT)
                         .show();
                 return false;
+
+
             }
         });
 
@@ -209,13 +239,13 @@ public class MainActivity extends AppCompatActivity  {
 
 
         final Button btnTemp = (Button) findViewById(R.id.btnTemp);
+        final Button btnAdd = (Button) findViewById(R.id.btnAdd);
 
         Date c = Calendar.getInstance().getTime();
         System.out.println("Current time => " + c);
 
         SimpleDateFormat df = new SimpleDateFormat("MMM/dd/yyyy");
         final String formattedDate = df.format(c);
-
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -229,92 +259,130 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void onClick(View view) {
 
-                if(editTemp.getText().toString().isEmpty()){
+                editTextItem.toString().isEmpty();
+
+                if (editTemp.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Please enter a value", Toast.LENGTH_SHORT).show();
                     //prevents further execution
                     return;
                 }
 
 
-
-
-                builder
-                        .setMessage("$"+editTemp.getText().toString()+" Is this your intended input?")
-                        .setPositiveButton("Confirm",  new DialogInterface.OnClickListener() {
+                builder.setView(editTextItem);
+                builder.setMessage("$" + editTemp.getText().toString() + " is your intended input? If so, feel free to add a description.")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                             @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 // Yes-code
                                 String val = getIntent().getStringExtra("PromptValue");
-                                double valBudget = Double.parseDouble(val);
+                                int valBudget = Integer.parseInt(val);
 
+                                int deduct = Integer.parseInt(editTemp.getText().toString());
+                                int currentAmount = valBudget - deduct;
 
-                                listDataHeader.add("$"+editTemp.getText().toString());
-                                double deduct = Double.parseDouble(editTemp.getText().toString());
-                                double currentAmount = valBudget - deduct;
+                                int xplus = x + 1;
 
-                                int xplus = x+1;
+                                detail = editTextItem.getText().toString();
+
+                                listDataHeader.add("$" + editTemp.getText().toString());
 
                                 List<String> ArrayNew = new ArrayList<>();
                                 ArrayNew.add(category);
                                 ArrayNew.add(formattedDate.toString());
-                                ArrayNew.add("Expense #"+xplus);
+                                ArrayNew.add(detail);
+
+
 
 
                                 listAdapter.notifyDataSetChanged();
                                 listDataChild.put(listDataHeader.get(x), ArrayNew);
 
                                 if (currentAmount > 0) {
-                                    if (x == 0) {
-
-                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(currentAmount));
-
-
-
+                                    if(x==0) {
+                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(valBudget - deduct));
                                     }
-
-                                    if (x != 0) {
-
-                                        double newValue = currentAmount - deduct;
-
-                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(newValue));
-
-
+                                    if(x>0) {
+                                        txtViewPrompt.setText("Your current budget is $" + String.valueOf(currentAmount - deduct));
                                     }
                                 }
 
-                                if (currentAmount < 0 || currentAmount == 0){
+                                else {
 
                                     txtViewPrompt.setText("You outspent your current budget!");
                                     btnTemp.setEnabled(false);
 
                                 }
 
-
                                 Toast.makeText(getApplicationContext(),
-                                        "Added.",
+                                        "Added expense.",
                                         Toast.LENGTH_SHORT).show();
 
 
+                                ((ViewGroup) editTextItem.getParent()).removeView(editTextItem);
 
                                 x++;
 
                                 saveUserInfo();
+
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
+
+
                                 dialog.cancel();
                             }
                         })
                         .show();
-
-
-
-
             }
         });
+
+        /*btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (editTemp.getText().toString().isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Please enter a value", Toast.LENGTH_SHORT).show();
+                    //prevents further execution
+                    return;
+                }
+
+                builder.setMessage("$" + editTemp.getText().toString() + "Note: This is to add an addition amount to your current budget. Are you sure?")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.N)
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Yes-code
+                                String val = getIntent().getStringExtra("PromptValue");
+                                int valBudget = Integer.parseInt(val);
+                                int deduct = Integer.parseInt(editTemp.getText().toString());
+
+                                txtViewPrompt.setText("Your current budget is $" + String.valueOf(Math.addExact(currentAmount, deduct)));
+
+
+                                Toast.makeText(getApplicationContext(),
+                                        "Added money to budget.",
+                                        Toast.LENGTH_SHORT).show();
+
+
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+
+
+                                dialog.cancel();
+                            }
+                        })
+                        .show();
+            }
+        });
+*/
+
+
 
 
         mToolBar = (Toolbar) findViewById(R.id.nav_action);
@@ -337,22 +405,16 @@ public class MainActivity extends AppCompatActivity  {
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 int id = menuItem.getItemId();
                 switch (id) {
-                    case R.id.food:
-                        Intent fo = new Intent(MainActivity.this, Food.class);
-                        fo.putExtra("PromptValue",txtViewPrompt.getText());
-                        startActivity(fo);
-                        break;
 
-                    case R.id.entertainment:
-                        Intent en = new Intent(MainActivity.this, Entertainment.class);
-                        en.putExtra("PromptValue",txtViewPrompt.getText());
-                        startActivity(en);
-                        break;
+                    case R.id.addAmount:
+                        String val = getIntent().getStringExtra("PromptValue");
+                        int valBudget = Integer.parseInt(val);
 
-                    case R.id.utilities:
-                        Intent ut = new Intent(MainActivity.this, Utilities.class);
-                        ut.putExtra("PromptValue",txtViewPrompt.getText());
-                        startActivity(ut);
+                        currentAmount = valBudget;
+
+                        Intent aa = new Intent(MainActivity.this, Add.class);
+                        aa.putExtra("PromptValue",currentAmount);
+                        startActivity(aa);
                         break;
 
                     case R.id.logout:
@@ -365,6 +427,49 @@ public class MainActivity extends AppCompatActivity  {
             }});}
 
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        savePrefs("XVALUE",x);
+
+
+        savePrefs("BUDGET",currentAmount);
+
+    }
+    private void savePrefs(String key, boolean value){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putBoolean(key,value);
+        edit.commit();
+    }
+
+    private void savePrefs(String key, String value){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putString(key,value);
+        edit.commit();
+    }
+
+    private void savePrefs(String key, int value){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putInt(key,value);
+        edit.commit();
+    }
+
+
+    private void loadPrefs(){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        int xvalue = sp.getInt("XVALUE",0);
+
+        int budget = sp.getInt("BUDGET",0);
+
+
+    }
+
+
+
     private void saveUserInfo(){
         String val = getIntent().getStringExtra("PromptValue");
         EditText editTemp = (EditText) findViewById(R.id.editTemp);
@@ -372,7 +477,16 @@ public class MainActivity extends AppCompatActivity  {
         String expenses = editTemp.getText().toString().trim();
         String budget = val.trim();
 
-        UserInfo userInfo = new UserInfo(budget,expenses);
+        Date c = Calendar.getInstance().getTime();
+        System.out.println("Current time => " + c);
+
+        SimpleDateFormat df = new SimpleDateFormat("MMM/dd/yyyy");
+        final String formattedDate = df.format(c);
+
+
+
+        UserInfo userInfo = new UserInfo("$"+budget,"$"+expenses,category,detail,formattedDate.toString());
+
 
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
@@ -394,46 +508,19 @@ public class MainActivity extends AppCompatActivity  {
         return super.onOptionsItemSelected(item);
     }
 
-
     public void prepareListData() {
         listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<String>>();
-        Entertainment ent = new Entertainment();
-
-        //listDataHeader.add("$5.00");
-        //listDataHeader.add("B");
-        //listDataHeader.add("C");
-        //listDataHeader.add("D");
-
-
-        //List<String> ArrayA = new ArrayList<>();
-        //ArrayA.add("Food");
-        //ArrayA.add("Feb/25/2018");
-        //ArrayA.add("Test");
-
-       /* List<String> B = new ArrayList<>();
-        B.add("Test");
-        B.add("Test");
-        B.add("Test");
-
-        List<String> C = new ArrayList<>();
-        C.add("Test");
-        C.add("Test");
-        C.add("Test");
-
-        List<String> D = new ArrayList<>();
-        D.add("Test");
-        D.add("Test");
-        D.add("Test");
-        */
-
-
-        //listDataChild.put(listDataHeader.get(0), ArrayA);
-        //listDataChild.put(listDataHeader.get(1), B);
-        //listDataChild.put(listDataHeader.get(2), C);
-        //listDataChild.put(listDataHeader.get(3), D);
+    }
 
     }
 
 
-        }
+
+
+
+
+
+
+
+

@@ -107,9 +107,14 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                             builder.setMessage("Please enter your planned budget");
                             builder.setCancelable(false);
                             builder.setView(editTextPrompt);
-                            builder.setNeutralButton("Enter", new DialogInterface.OnClickListener() {
+                            builder.setPositiveButton("Enter", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    if(editTextPrompt.getText().toString().isEmpty()) {
+                                        Toast.makeText(getApplicationContext(), "Please enter a value", Toast.LENGTH_SHORT).show();
+                                        //prevents further execution
+                                        return;
+                                    }
                                     Intent intent;
                                     Toast.makeText(getApplicationContext(), "Thanks for the input. Now beginning demo.", Toast.LENGTH_LONG).show();
                                     //beginning profile
