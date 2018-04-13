@@ -1,4 +1,5 @@
-*If you are reading this, chances are that this school project has been completed by now. Hopefully atleast. Although, this can make for a nice little memory later on or now. Thanks for reading. - Michael B, developer of Mr. Budget*
+*If you are reading this, chances are that this school project has been completed by now. Hopefully atleast. Although, this can make for a nice little memory later on or now. Thanks for reading. 
+                                                                    - Michael B, developer of Mr. Budget (April 12, 2018)*
 
 This is a school project. That's it. 
 
